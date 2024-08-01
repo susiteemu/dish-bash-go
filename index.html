@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="lemonade">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTMX & Go - Demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+    <script
+      src="https://unpkg.com/htmx.org@1.9.2"
+      integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      .my-indicator {
+        display: none;
+      }
+      .htmx-request .my-indicator {
+        display: inline;
+      }
+      .htmx-request.my-indicator {
+        display: inline;
+      }
+    </style>
+  </head>
+  <body class="w-full">
+    <div class="navbar bg-base-300 w-full">
+      <button class="btn btn-ghost text-xl">Dish! Bash! Go!</button>
+    </div>
+    <div class="flex flex-col lg:flex-row p-4 w-2/3">
+      <div
+        class="grid flex-grow h-full card bg-base-300 p-4 rounded-box place-items-start"
+      >
+        <div class="flex flex-col w-full border-opacity-50">
+          <div
+            class="grid flex-grow h-60 card bg-base-300 rounded-box place-items-start"
+          >
+            <h2 class="mb-3 text-3xl">Add Dish</h2>
+
+            <form
+              hx-post="/dish"
+              hx-target="#dish-list"
+              hx-swap="afterbegin"
+              hx-disable-elt="this"
+              hx-indicator="#spinner"
+              class="space-y-3 w-full"
+            >
+              <div>
+                <label
+                  for="dish-name"
+                  class="input input-bordered flex items-center gap-2 w-1/2"
+                  >Name
+                  <input type="text" name="name" id="dish-name" class="grow" />
+                </label>
+              </div>
+              <div>
+                <label
+                  for="dish-url"
+                  class="input input-bordered flex items-center gap-2 w-1/2"
+                  >Url
+                  <input type="text" name="url" id="dish-url" class="grow" />
+                </label>
+              </div>
+
+              <button
+                class="btn btn-primary items-center text-center"
+                hx-disabled-elt="this"
+              >
+                <span
+                  class="my-indicator loading loading-ring loading-md"
+                  id="spinner"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+
+                Save
+              </button>
+            </form>
+          </div>
+          <div class="divider"></div>
+          <div class="mb-2">
+            <div class="flex w-full">
+              <div
+                class="grid h-20 w-7/12 flex-grow card bg-base-300 rounded-box place-items-center"
+              >
+                <label
+                  class="input w-full input-bordered flex items-center gap-2 mb-4"
+                >
+                  <input
+                    type="search"
+                    name="search"
+                    class="grow"
+                    placeholder="Search"
+                    hx-post="/search"
+                    hx-trigger="input changed delay:500ms, search"
+                    hx-target="#dish-list"
+                    hx-indicator=".htmx-indicator"
+                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    class="w-4 h-4 opacity-70"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </label>
+              </div>
+              <div class="divider divider-horizontal">OR</div>
+              <div
+                class="grid h-20 flex-grow card bg-base-300 rounded-box place-items-left inline-block"
+              >
+                <button class="btn btn-secondary btn-sm">Show oldest</button>
+                <button class="btn btn-secondary btn-sm">
+                  Show least used
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="w-full">{{ template "dishes" . }}</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

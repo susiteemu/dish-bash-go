@@ -1,0 +1,11 @@
+{{ define "suggested-dishes" }}
+<ul
+  class="space-y-4"
+  id="suggested-dish-list"
+  hx-target="closest li"
+  hx-swap="outerHTML swap:0.2s"
+>
+  {{ range .SuggestedDishes }} {{ block "suggested-dish-list-element" .}} {{
+  template "dish-item" . }} {{ end }} {{ end }}
+</ul>
+{{ end }}

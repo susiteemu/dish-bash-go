@@ -1,0 +1,11 @@
+{{ define "dishes" }}
+<ul
+  class="space-y-4"
+  id="dish-list"
+  hx-target="closest li"
+  hx-swap="outerHTML swap:0.2s"
+>
+  {{ range .Dishes }} {{ block "dish-list-element" .}} {{ template "dish-item" .
+  }} {{ end }} {{ end }}
+</ul>
+{{ end }}
