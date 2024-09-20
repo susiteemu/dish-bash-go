@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="lemonade">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -39,49 +39,64 @@
       >
         <div class="flex flex-col w-full border-opacity-50">
           <div
-            class="grid flex-grow h-60 card bg-base-300 rounded-box place-items-start"
+            class="grid grid-cols-2 h-60 card bg-base-300 rounded-box place-items-start"
           >
-            <h2 class="mb-3 text-3xl">Add Dish</h2>
+            <div>
+              <h2 class="mb-3 text-3xl">Add Dish</h2>
 
-            <form
-              hx-post="/dish"
-              hx-target="#dish-list"
-              hx-swap="afterbegin"
-              hx-disable-elt="this"
-              hx-indicator="#spinner"
-              class="space-y-3 w-full"
-            >
-              <div>
-                <label
-                  for="dish-name"
-                  class="input input-bordered flex items-center gap-2 w-1/2"
-                  >Name
-                  <input type="text" name="name" id="dish-name" class="grow" />
-                </label>
-              </div>
-              <div>
-                <label
-                  for="dish-url"
-                  class="input input-bordered flex items-center gap-2 w-1/2"
-                  >Url
-                  <input type="text" name="url" id="dish-url" class="grow" />
-                </label>
-              </div>
-
-              <button
-                class="btn btn-primary items-center text-center"
-                hx-disabled-elt="this"
+              <form
+                hx-post="/dish"
+                hx-target="#dish-list"
+                hx-swap="afterbegin"
+                hx-disable-elt="this"
+                hx-indicator="#spinner"
+                class="space-y-3 w-full"
               >
-                <span
-                  class="my-indicator loading loading-ring loading-md"
-                  id="spinner"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
+                <div>
+                  <label
+                    for="dish-name"
+                    class="input input-bordered flex items-center gap-2"
+                    >Name
+                    <input
+                      type="text"
+                      name="name"
+                      id="dish-name"
+                      class="grow"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label
+                    for="dish-url"
+                    class="input input-bordered flex items-center gap-2"
+                    >Url
+                    <input type="text" name="url" id="dish-url" class="grow" />
+                  </label>
+                </div>
 
-                Save
-              </button>
-            </form>
+                <button
+                  class="btn btn-primary items-center text-center"
+                  hx-disabled-elt="this"
+                >
+                  <span
+                    class="my-indicator loading loading-ring loading-md"
+                    id="spinner"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+
+                  Save
+                </button>
+              </form>
+            </div>
+            <div class="w-full flex flex-row justify-end">
+              <div>
+                <img
+                  class="object-scale-down h-60"
+                  src="/static/hungry-cairn.png"
+                />
+              </div>
+            </div>
           </div>
           <div class="divider"></div>
           <div class="mb-2">
@@ -120,10 +135,8 @@
               <div
                 class="grid h-20 flex-grow card bg-base-300 rounded-box place-items-left inline-block"
               >
-                <button class="btn btn-secondary btn-sm">Show oldest</button>
-                <button class="btn btn-secondary btn-sm">
-                  Show least used
-                </button>
+                <button class="btn bg-slate-300 btn-sm">Show oldest</button>
+                <button class="btn bg-slate-300 btn-sm">Show least used</button>
               </div>
             </div>
           </div>

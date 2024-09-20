@@ -3,10 +3,12 @@ package model
 import "time"
 
 type Dish struct {
-	Id      int
-	Name    string
-	Url     string
-	Created time.Time
+	Id        int
+	Name      string
+	Url       string
+	Created   time.Time
+	UsedCount int
+	LastUsage time.Time
 }
 
 type UsageStats struct {
@@ -24,9 +26,9 @@ type TemplateDish struct {
 }
 
 type UsageOptions struct {
-	Today     UsageOption
-	Yesterday UsageOption
-	Older     []UsageOption
+	Today      UsageOption
+	Yesterday  UsageOption
+	WithinWeek UsageOption
 }
 
 type UsageOption struct {

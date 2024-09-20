@@ -4,29 +4,42 @@
 >
   <div class="flex items-center space-x-4">
     <div>
-      <h3 class="text-lg font-medium">{{ .Name }}</h3>
-      <a href="{{ .Url }}" class="text-blue-500">{{ .Url }}</a>
+      <h3 class="text-lg font-medium"><a href="{{ .Url }}">{{ .Name }}</a></h3>
       <div class="join">
         <span class="badge badge-primary badge-outline join-item"
           >{{ .UsageStats.Count }}x</span
         >
-        <span class="badge badge-primary badge-outline join-item"
-          >{{ .UsageStats.DaysSince }}d</span
+        {{if ge .UsageStats.DaysSince 0 }}
+        <span class="badge badge-primary badge-outline join-item">
+          {{ .UsageStats.DaysSince }}d</span
         >
+        {{else}}
+        <span class="badge badge-primary badge-outline join-item"> Never</span>
+        {{end}}
       </div>
     </div>
   </div>
 
   <div class="flex space-x-4">
     <div class="join">
-      <select class="select select-bordered join-item">
-        <option disabled selected>Used</option>
-        {{ range .UsageOptions.Older }}
-        <option value="{{ .Id }}">{{ .Name }}</option>
-        {{ end }}
-      </select>
-      <button class="btn join-item">{{ .UsageOptions.Yesterday.Name }}</button>
-      <button class="btn join-item">{{ .UsageOptions.Today.Name }}</button>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.WithinWeek.Id}}"
+        class="btn join-item bg-green-200"
+      >
+        {{ .UsageOptions.WithinWeek.Name }}
+      </button>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Yesterday.Id}}"
+        class="btn join-item bg-green-300"
+      >
+        {{ .UsageOptions.Yesterday.Name }}
+      </button>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Today.Id}}"
+        class="btn join-item bg-green-400"
+      >
+        {{ .UsageOptions.Today.Name }}
+      </button>
     </div>
 
     <button

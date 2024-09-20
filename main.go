@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"math/rand/v2"
 	"os"
 	"strconv"
 	"time"
@@ -31,6 +30,56 @@ func newTemplate() *Templates {
 	}
 }
 
+func useSelections() []model.UsageOption {
+	var useSelections []model.UsageOption
+	now := time.Now()
+	daysBefore := 7
+	for i := 0; i < daysBefore; i++ {
+		d := now.Add(time.Duration(i) * time.Hour * 24 * -1)
+		useSelections = append(useSelections, model.UsageOption{
+			Id:   d.Unix(),
+			Name: d.Format("2.1"),
+		})
+	}
+	return useSelections
+}
+
+func mapDish(v model.Dish) model.TemplateDish {
+
+	useSelections := useSelections()
+
+	now := time.Now()
+	lastUsage := v.LastUsage
+	daysSince := -1
+	if !lastUsage.IsZero() {
+		daysSince = int(now.Sub(lastUsage).Hours() / 24)
+	}
+	return model.TemplateDish{
+		Id:      v.Id,
+		Name:    v.Name,
+		Url:     v.Url,
+		Created: v.Created,
+		UsageOptions: model.UsageOptions{
+			Today: model.UsageOption{
+				Id:   useSelections[0].Id,
+				Name: "Today",
+			},
+			Yesterday: model.UsageOption{
+				Id:   useSelections[1].Id,
+				Name: "Yesterday",
+			},
+			WithinWeek: model.UsageOption{
+				Id:   useSelections[6].Id,
+				Name: "Within Week",
+			},
+		},
+		UsageStats: model.UsageStats{
+			Count:     v.UsedCount,
+			DaysSince: daysSince,
+		},
+	}
+}
+
 func main() {
 	dbinit.Init()
 
@@ -49,43 +98,9 @@ func main() {
 			return echo.NewHTTPError(500, "Failed to get dishes")
 		}
 
-		var useSelections []model.UsageOption
-		now := time.Now()
-		daysBefore := 14
-		for i := 0; i < daysBefore; i++ {
-			d := now.Add(time.Duration(i) * time.Hour * 24 * -1)
-			useSelections = append(useSelections, model.UsageOption{
-				Id:   d.Unix(),
-				Name: d.Format("2.1"),
-			})
-		}
-
 		var templateDishes []model.TemplateDish
 		for _, v := range allDishes {
-			randomCount := rand.IntN(100)
-			randomDate := now.Add(time.Duration(100-randomCount) * time.Hour * 24 * -1)
-			randomDays := int(now.Sub(randomDate).Hours() / 24)
-			templateDishes = append(templateDishes, model.TemplateDish{
-				Id:      v.Id,
-				Name:    v.Name,
-				Url:     v.Url,
-				Created: v.Created,
-				UsageOptions: model.UsageOptions{
-					Today: model.UsageOption{
-						Id:   useSelections[0].Id,
-						Name: "Today",
-					},
-					Yesterday: model.UsageOption{
-						Id:   useSelections[1].Id,
-						Name: "Yesterday",
-					},
-					Older: useSelections[2:],
-				},
-				UsageStats: model.UsageStats{
-					Count:     randomCount,
-					DaysSince: randomDays,
-				},
-			})
+			templateDishes = append(templateDishes, mapDish(v))
 		}
 
 		// TODO logic for suggestions
@@ -104,16 +119,19 @@ func main() {
 		log.Printf("Inserting dish with name %s and url %s", name, url)
 
 		dish, err := repo.InsertDish(model.Dish{
-			Name: name,
-			Url:  url,
+			Name:      name,
+			Url:       url,
+			UsedCount: 0,
 		})
+
+		templateDish := mapDish(dish)
 
 		if err != nil {
 			log.Fatal("Error occurred when inserting dish", err)
 		}
 
 		log.Printf("Inserted dish %v", dish)
-		return c.Render(200, "dish-item", dish)
+		return c.Render(200, "dish-item", templateDish)
 	}
 
 	deleteDish := func(c echo.Context) error {
@@ -155,35 +173,9 @@ func main() {
 		}
 		log.Printf("Got %d results", len(allDishes))
 
-		var useSelections []model.UsageOption
-		now := time.Now()
-		daysBefore := 14
-		for i := 0; i < daysBefore; i++ {
-			d := now.Add(time.Duration(i) * time.Hour * 24 * -1)
-			useSelections = append(useSelections, model.UsageOption{
-				Id:   d.Unix(),
-				Name: d.Format("2.1"),
-			})
-		}
-
 		var templateDishes []model.TemplateDish
 		for _, v := range allDishes {
-			randomCount := rand.IntN(100)
-			randomDate := now.Add(time.Duration(100-randomCount) * time.Hour * 24 * -1)
-			randomDays := int(now.Sub(randomDate).Hours() / 24)
-			templateDishes = append(templateDishes, model.TemplateDish{
-				Id:      v.Id,
-				Name:    v.Name,
-				Url:     v.Url,
-				Created: v.Created,
-				UsageOptions: model.UsageOptions{
-					Older: useSelections,
-				},
-				UsageStats: model.UsageStats{
-					Count:     randomCount,
-					DaysSince: randomDays,
-				},
-			})
+			templateDishes = append(templateDishes, mapDish(v))
 		}
 
 		dishes := map[string][]model.TemplateDish{
@@ -192,12 +184,23 @@ func main() {
 		return c.Render(200, "dishes", dishes)
 	}
 
+	useDish := func(c echo.Context) error {
+		path := c.Request().URL
+		id, _ := strconv.Atoi(c.Param("id"))
+		q := c.Request().URL.Query()
+		ts := q.Get("ts")
+		log.Printf("Use dish handler is going to handle this request to %v with id %d and ts %s", path, id, ts)
+		return c.NoContent(200)
+	}
+
 	e := echo.New()
+	e.Static("/static", "assets")
 	e.Use(middleware.Logger())
 	e.Renderer = newTemplate()
 	e.GET("/", root)
 	e.POST("/dish", addDish)
 	e.DELETE("/dish/:id", deleteDish)
 	e.POST("/search", searchDishes)
+	e.POST("/dish/:id/use", useDish)
 	e.Logger.Fatal(e.Start(":1323"))
 }

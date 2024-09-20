@@ -37,27 +37,31 @@ func (repo Repo) SelectAllDishes() ([]model.Dish, error) {
 
 	var dishes []model.Dish
 	db := repo.db
-	rows, err := db.Query("SELECT id, name, url, created FROM dish ORDER BY created DESC")
+	rows, err := db.Query("SELECT id, name, url, created, usedCount, lastUsage FROM dish ORDER BY created DESC")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			id      int
-			name    string
-			url     string
-			created time.Time
+			id        int
+			name      string
+			url       string
+			created   time.Time
+			usedCount int
+			lastUsage time.Time
 		)
-		err = rows.Scan(&id, &name, &url, &created)
+		err = rows.Scan(&id, &name, &url, &created, &usedCount, &lastUsage)
 		if err != nil {
 			log.Fatal(err)
 		} else {
 			dishes = append(dishes, model.Dish{
-				Id:      id,
-				Name:    name,
-				Url:     url,
-				Created: created,
+				Id:        id,
+				Name:      name,
+				Url:       url,
+				Created:   created,
+				UsedCount: usedCount,
+				LastUsage: lastUsage,
 			})
 		}
 	}
@@ -73,14 +77,16 @@ func (repo Repo) SelectDishById(id int) (model.Dish, error) {
 	log.Printf("Selecting dish by id %d", id)
 
 	db := repo.db
-	row := db.QueryRow("SELECT name, url, created FROM dish WHERE id = $1", id)
+	row := db.QueryRow("SELECT name, url, created, usedCount, lastUsage FROM dish WHERE id = $1", id)
 
 	var (
-		name    string
-		url     string
-		created time.Time
+		name      string
+		url       string
+		created   time.Time
+		usedCount int
+		lastUsage time.Time
 	)
-	err := row.Scan(&name, &url, &created)
+	err := row.Scan(&name, &url, &created, &usedCount, &lastUsage)
 	if err != nil {
 		log.Fatal(err)
 		return model.Dish{}, err
@@ -89,10 +95,12 @@ func (repo Repo) SelectDishById(id int) (model.Dish, error) {
 	log.Printf("Got dish name=%s, url=%s, created=%v with id=%d", name, url, created, id)
 
 	return model.Dish{
-		Id:      id,
-		Name:    name,
-		Url:     url,
-		Created: created,
+		Id:        id,
+		Name:      name,
+		Url:       url,
+		Created:   created,
+		UsedCount: usedCount,
+		LastUsage: lastUsage,
 	}, nil
 }
 
@@ -100,27 +108,31 @@ func (repo Repo) Search(query string) ([]model.Dish, error) {
 
 	var dishes []model.Dish
 	db := repo.db
-	rows, err := db.Query("SELECT id, name, url, created FROM dish WHERE name LIKE '%' || $1 || '%' ORDER BY created DESC", query)
+	rows, err := db.Query("SELECT id, name, url, created, usedCount, lastUsage FROM dish WHERE name LIKE '%' || $1 || '%' ORDER BY created DESC", query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			id      int
-			name    string
-			url     string
-			created time.Time
+			id        int
+			name      string
+			url       string
+			created   time.Time
+			usedCount int
+			lastUsage time.Time
 		)
-		err = rows.Scan(&id, &name, &url, &created)
+		err = rows.Scan(&id, &name, &url, &created, &usedCount, &lastUsage)
 		if err != nil {
 			log.Fatal(err)
 		} else {
 			dishes = append(dishes, model.Dish{
-				Id:      id,
-				Name:    name,
-				Url:     url,
-				Created: created,
+				Id:        id,
+				Name:      name,
+				Url:       url,
+				Created:   created,
+				UsedCount: usedCount,
+				LastUsage: lastUsage,
 			})
 		}
 	}
@@ -140,14 +152,14 @@ func (repo Repo) InsertDish(dish model.Dish) (model.Dish, error) {
 		return model.Dish{}, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO dish(name, url, created) VALUES(?, ?, ?) RETURNING id")
+	stmt, err := tx.Prepare("INSERT INTO dish(name, url, created, usedCount, lastUsage) VALUES(?, ?, ?, ?, ?) RETURNING id")
 	if err != nil {
 		log.Fatal(err)
 		return model.Dish{}, err
 	}
 	defer stmt.Close()
 	var id int
-	err = stmt.QueryRow(dish.Name, dish.Url, time.Now()).Scan(&id)
+	err = stmt.QueryRow(dish.Name, dish.Url, time.Now(), dish.UsedCount, time.Time{}).Scan(&id)
 	if err != nil {
 		return model.Dish{}, err
 	}
