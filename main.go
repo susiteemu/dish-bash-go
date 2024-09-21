@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dish-dash-go/db"
-	dbinit "dish-dash-go/db_init"
-	"dish-dash-go/model"
+	"dish-bash-go/db"
+	dbinit "dish-bash-go/db_init"
+	"dish-bash-go/model"
 	"fmt"
 	"html/template"
 	"io"

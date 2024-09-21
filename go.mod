@@ -1,4 +1,4 @@
-module dish-dash-go
+module dish-bash-go
 
 go 1.22.1
 

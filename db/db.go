@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"dish-dash-go/model"
+	"dish-bash-go/model"
 	"fmt"
 	"log"
 	"time"
