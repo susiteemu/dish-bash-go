@@ -83,7 +83,7 @@ func mapDish(v model.Dish) model.TemplateDish {
 }
 
 func main() {
-	dbinit.Init(true)
+	dbinit.Init(false)
 
 	repo, err := db.NewRepo()
 	if err != nil {
