@@ -24,7 +24,7 @@ func NewRepo() (*Repo, error) {
 
 func openDB() (*sql.DB, error) {
 
-	db, err := sql.Open("sqlite3", "./dishbashgo.db")
+	db, err := sql.Open("sqlite", "./dishbashgo.db")
 	if err != nil {
 		fmt.Println("db problem")
 		log.Fatal(err)

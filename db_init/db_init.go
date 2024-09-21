@@ -14,7 +14,7 @@ func Init(testData bool) {
 		os.Remove("./dishbashgo.db")
 	}
 
-	db, err := sql.Open("sqlite3", "./dishbashgo.db")
+	db, err := sql.Open("sqlite", "./dishbashgo.db")
 	if err != nil {
 		log.Fatal(err)
 	}

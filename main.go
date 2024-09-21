@@ -12,9 +12,10 @@ import (
 	"strconv"
 	"time"
 
+	_ "modernc.org/sqlite"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Templates struct {
@@ -82,7 +83,7 @@ func mapDish(v model.Dish) model.TemplateDish {
 }
 
 func main() {
-	dbinit.Init(false)
+	dbinit.Init(true)
 
 	repo, err := db.NewRepo()
 	if err != nil {
