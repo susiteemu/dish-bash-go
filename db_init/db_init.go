@@ -8,9 +8,11 @@ import (
 	"time"
 )
 
-func Init() {
+func Init(testData bool) {
 
-	os.Remove("./dishbashgo.db")
+	if testData {
+		os.Remove("./dishbashgo.db")
+	}
 
 	db, err := sql.Open("sqlite3", "./dishbashgo.db")
 	if err != nil {
@@ -31,16 +33,18 @@ func Init() {
 		log.Fatal(err)
 	}
 
-	// generate some test data
-	stmt, err := tx.Prepare("insert into dish(id, name, url, created, usedCount, lastUsage) values(?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-	for i := 0; i < 100; i++ {
-		_, err = stmt.Exec(i, fmt.Sprintf("Ruoka %03d", i), fmt.Sprintf("https://ruoka%03d.fi", i), time.Now(), i+5, time.Now().Add(time.Duration(-i*24)*time.Hour))
+	if testData {
+		// generate some test data
+		stmt, err := tx.Prepare("insert into dish(id, name, url, created, usedCount, lastUsage) values(?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			log.Fatal(err)
+		}
+		defer stmt.Close()
+		for i := 0; i < 100; i++ {
+			_, err = stmt.Exec(i, fmt.Sprintf("Ruoka %03d", i), fmt.Sprintf("https://ruoka%03d.fi", i), time.Now(), i+5, time.Now().Add(time.Duration(-i*24)*time.Hour))
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 	err = tx.Commit()

@@ -4,6 +4,7 @@ import (
 	"dish-dash-go/db"
 	dbinit "dish-dash-go/db_init"
 	"dish-dash-go/model"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -62,15 +63,15 @@ func mapDish(v model.Dish) model.TemplateDish {
 		UsageOptions: model.UsageOptions{
 			Today: model.UsageOption{
 				Id:   useSelections[0].Id,
-				Name: "Today",
+				Name: "Tänään",
 			},
 			Yesterday: model.UsageOption{
 				Id:   useSelections[1].Id,
-				Name: "Yesterday",
+				Name: "Eilen",
 			},
 			WithinWeek: model.UsageOption{
 				Id:   useSelections[6].Id,
-				Name: "Within Week",
+				Name: "Viikon sisällä",
 			},
 		},
 		UsageStats: model.UsageStats{
@@ -81,7 +82,7 @@ func mapDish(v model.Dish) model.TemplateDish {
 }
 
 func main() {
-	dbinit.Init()
+	dbinit.Init(false)
 
 	repo, err := db.NewRepo()
 	if err != nil {
@@ -123,12 +124,11 @@ func main() {
 			Url:       url,
 			UsedCount: 0,
 		})
-
-		templateDish := mapDish(dish)
-
 		if err != nil {
 			log.Fatal("Error occurred when inserting dish", err)
 		}
+
+		templateDish := mapDish(dish)
 
 		log.Printf("Inserted dish %v", dish)
 		return c.Render(200, "dish-item", templateDish)
@@ -188,19 +188,88 @@ func main() {
 		path := c.Request().URL
 		id, _ := strconv.Atoi(c.Param("id"))
 		q := c.Request().URL.Query()
-		ts := q.Get("ts")
-		log.Printf("Use dish handler is going to handle this request to %v with id %d and ts %s", path, id, ts)
-		return c.NoContent(200)
+		qts := q.Get("ts")
+		ts, err := strconv.ParseInt(qts, 10, 64)
+		if err != nil {
+			log.Fatal(err)
+			return echo.NewHTTPError(400, "Cannot parse timestamp to integer")
+		}
+		log.Printf("Use dish handler is going to handle this request to %v with id %d and ts %d", path, id, ts)
+
+		t := time.Unix(ts, 0)
+		dish, err := repo.SelectDishById(id)
+		if err != nil {
+			log.Fatal(err)
+			return echo.NewHTTPError(404, fmt.Sprintf("Cannot find dish by id %d", id))
+		}
+
+		dish.UsedCount = dish.UsedCount + 1
+
+		if dish.LastUsage.Unix() < t.Unix() {
+			dish.LastUsage = t
+		}
+
+		dish, err = repo.UpdateDish(dish)
+		if err != nil {
+			log.Fatal(err)
+			return echo.NewHTTPError(500, "Failed to update dish")
+		}
+
+		templateDish := mapDish(dish)
+
+		log.Printf("Updated usage to dish %v", dish)
+		return c.Render(200, "dish-item", templateDish)
+	}
+
+	sortDishes := func(c echo.Context) error {
+		path := c.Request().URL
+		q := c.Request().URL.Query()
+		sort := q.Get("s")
+		log.Printf("Sort dishes handler is going to handle this request to %v with sort %s", path, sort)
+
+		var allDishes []model.Dish
+		var err error
+		switch sort {
+		case "desc_lastusage":
+			allDishes, err = repo.SortByLastUsageDesc()
+		case "asc_lastusage":
+			allDishes, err = repo.SortByLastUsageAsc()
+		case "desc_usedcount":
+			allDishes, err = repo.SortByUsedCountDesc()
+		case "asc_usedcount":
+			allDishes, err = repo.SortByUsedCountAsc()
+		default:
+			allDishes, err = repo.SelectAllDishes()
+
+		}
+
+		if err != nil {
+			log.Fatal(err)
+			return echo.NewHTTPError(500, "Failed to get dishes")
+		}
+
+		var templateDishes []model.TemplateDish
+		for _, v := range allDishes {
+			templateDishes = append(templateDishes, mapDish(v))
+		}
+
+		dishes := map[string][]model.TemplateDish{
+			"Dishes": templateDishes,
+		}
+		return c.Render(200, "dishes", dishes)
+
 	}
 
 	e := echo.New()
 	e.Static("/static", "assets")
+	e.Static("/css", "css")
 	e.Use(middleware.Logger())
 	e.Renderer = newTemplate()
 	e.GET("/", root)
 	e.POST("/dish", addDish)
 	e.DELETE("/dish/:id", deleteDish)
 	e.POST("/search", searchDishes)
+	e.POST("/sort", sortDishes)
 	e.POST("/dish/:id/use", useDish)
 	e.Logger.Fatal(e.Start(":1323"))
 }

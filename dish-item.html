@@ -1,8 +1,8 @@
 {{ define "dish-item" }}
-<li
-  class="flex items-center justify-between bg-base-100 rounded-lg p-4 shadow-md"
->
-  <div class="flex items-center space-x-4">
+<tr class="flex flex-col mb-4 sm:table-row">
+  <td
+    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
+  >
     <div>
       <h3 class="text-lg font-medium"><a href="{{ .Url }}">{{ .Name }}</a></h3>
       <div class="join">
@@ -18,32 +18,37 @@
         {{end}}
       </div>
     </div>
-  </div>
+  </td>
 
-  <div class="flex space-x-4">
-    <div class="join">
+  <td
+    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
+  >
+    <div class="join join-horizontal lg:join-vertical">
       <button
         hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.WithinWeek.Id}}"
-        class="btn join-item bg-green-200"
+        class="btn btn-sm join-item bg-green-200"
       >
         {{ .UsageOptions.WithinWeek.Name }}
       </button>
       <button
         hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Yesterday.Id}}"
-        class="btn join-item bg-green-300"
+        class="btn btn-sm join-item bg-green-300"
       >
         {{ .UsageOptions.Yesterday.Name }}
       </button>
       <button
         hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Today.Id}}"
-        class="btn join-item bg-green-400"
+        class="btn btn-sm join-item bg-green-400"
       >
         {{ .UsageOptions.Today.Name }}
       </button>
     </div>
-
+  </td>
+  <td
+    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
+  >
     <button
-      class="btn btn-square btn-outline btn-error self-end"
+      class="btn btn-sm btn-square btn-outline btn-error self-end self-center"
       hx-delete="/dish/{{.Id}}"
     >
       <svg
@@ -61,6 +66,6 @@
         />
       </svg>
     </button>
-  </div>
-</li>
+  </td>
+</tr>
 {{ end }}
