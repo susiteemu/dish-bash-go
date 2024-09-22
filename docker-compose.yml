@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  dishbashgo:
+    container_name: dish-bash-go
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '1323:1323/tcp'
+    volumes:
+      - './dishbashgo.db:/app/dishbashgo.db'
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: ${DOCKER_NETWORK}
