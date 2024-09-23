@@ -4,7 +4,9 @@
     class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
   >
     <div>
-      <h3 class="text-lg font-medium"><a href="{{ .Url }}">{{ .Name }}</a></h3>
+      <h3 class="text-lg font-medium">
+        <a href="{{ .Url }}">{{ .Name }} {{if .Url }} ⤴ {{end}} </a>
+      </h3>
       <div class="join">
         <span class="badge badge-primary badge-outline join-item"
           >{{ .UsageStats.Count }}x</span
