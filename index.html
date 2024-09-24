@@ -40,7 +40,9 @@
     </div>
     <div class="flex mt-4 md:m-4">
       <div class="md:w-1/3">
-        <div class="h-65 p-4 bg-base-300 flex rounded-box">
+        <div
+          class="h-65 p-4 bg-base-300 flex rounded-box rounded-br-none rounded-bl-none"
+        >
           <div class="w-full md:w-2/3">
             <h3 class="mb-3 text-3xl">Lisää ruoka</h3>
 
@@ -147,7 +149,7 @@
           </div>
         </div>
         <div class="w-full p-4">
-          <div class="flex items-center sm:justify-center ml-4 sm:ml-0">
+          <div class="flex items-center sm:justify-center sm:ml-0">
             {{ template "dishes" . }}
           </div>
         </div>

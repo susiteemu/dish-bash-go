@@ -1,7 +1,7 @@
 {{ define "dish-item" }}
 <tr class="flex flex-col mb-4 sm:table-row">
   <td
-    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
+    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg relative"
   >
     <div>
       <h3 class="text-lg font-medium">
@@ -16,41 +16,14 @@
           {{ .UsageStats.DaysSince }}d</span
         >
         {{else}}
-        <span class="badge badge-primary badge-outline join-item"> Never</span>
+        <span class="badge badge-primary badge-outline join-item">
+          Ei koskaan</span
+        >
         {{end}}
       </div>
     </div>
-  </td>
-
-  <td
-    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
-  >
-    <div class="join join-horizontal lg:join-vertical">
-      <button
-        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.WithinWeek.Id}}"
-        class="btn btn-sm join-item bg-green-200"
-      >
-        {{ .UsageOptions.WithinWeek.Name }}
-      </button>
-      <button
-        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Yesterday.Id}}"
-        class="btn btn-sm join-item bg-green-300"
-      >
-        {{ .UsageOptions.Yesterday.Name }}
-      </button>
-      <button
-        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Today.Id}}"
-        class="btn btn-sm join-item bg-green-400"
-      >
-        {{ .UsageOptions.Today.Name }}
-      </button>
-    </div>
-  </td>
-  <td
-    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
-  >
     <button
-      class="btn btn-sm btn-square btn-outline btn-error self-end self-center"
+      class="btn btn-sm btn-square rounded-bl-none rounded-tl-none rounded-br-none btn-error absolute right-0 top-0"
       hx-delete="/dish/{{.Id}}"
     >
       <svg
@@ -68,6 +41,31 @@
         />
       </svg>
     </button>
+  </td>
+
+  <td
+    class="px-4 py-3 bg-gray-200 first:rounded-t-lg last:rounded-b-lg sm:first:rounded-t-none sm:last:rounded-b-none sm:first:rounded-tl-lg sm:first:rounded-bl-lg sm:last:rounded-tr-lg sm:last:rounded-br-lg"
+  >
+    <div>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.WithinWeek.Id}}"
+        class="btn btn-sm bg-green-200"
+      >
+        {{ .UsageOptions.WithinWeek.Name }}
+      </button>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Yesterday.Id}}"
+        class="btn btn-sm bg-green-300"
+      >
+        {{ .UsageOptions.Yesterday.Name }}
+      </button>
+      <button
+        hx-post="/dish/{{.Id}}/use?ts={{.UsageOptions.Today.Id}}"
+        class="btn btn-sm bg-green-400"
+      >
+        {{ .UsageOptions.Today.Name }}
+      </button>
+    </div>
   </td>
 </tr>
 {{ end }}
