@@ -1,1 +1,6 @@
 dish-bash-go
+.DS_Store
+dishbashgo.db
+tmp
+build
+target
